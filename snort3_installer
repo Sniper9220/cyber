@@ -27,49 +27,6 @@ liblzma-dev \
 xz-utils \
 wget;
 
-echo -e "\e[33mBuild-Essentials\e[0m"
-build-essentials --version
-echo -e "\e[33mg++\e[0m"
-g++ --version
-echo -e "\e[33mcmake\e[0m"
-cmake --version
-echo -e "\e[33mflex\e[0m"
-flex --version
-echo -e "\e[33mbison\e[0m"
-bison --version
-echo -e "\e[33mgit\e[0m"
-git --version
-echo -e "\e[33mmake\e[0m"
-make --version
-echo -e "\e[33mautoconf\e[0m"
-autoconf --version
-echo -e "\e[33mautomake\e[0m"
-automake --version
-echo -e "\e[33mlibtool\e[0m"
-libtool --version
-echo -e "\e[33mpkg_config\e[0m"
-pkg-config --version
-echo -e "\e[33mlibcap-dev\e[0m"
-libpcap-dev --version
-echo -e "\e[33mlibhwloc-dev\e[0m"
-libhwloc-dev --version
-echo -e "\e[33mlibluajit-5.1\e[0m"
-libluajit-5.1-dev --version
-echo -e "\e[33mlibssl-dev\e[0m"
-libssl-dev --version
-echo -e "\e[33mzlib1g-dev\e[0m"
-zlib1g-dev --version
-echo -e "\e[33mlibpcre2-dev\e[0m"
-libpcre2-dev --version
-echo -e "\e[33mlibdumbnet-dev\e[0m"
-libdumbnet-dev --version
-echo -e "\e[33mliblzma-dev\e[0m"
-liblzma-dev --version
-echo -e "\e[33mxz-utils\e[0m"
-xz-utils --version
-echo -e "\e[33mwget\e[0m"
-wget --version;
-
 echo -e "\n\e[33m[g++]\e[0m"; g++ --version | head -n 1
 echo -e "\n\e[33m[cmake]\e[0m"; cmake --version | head -n 1
 echo -e "\n\e[33m[flex]\e[0m"; flex --version
