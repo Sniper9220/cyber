@@ -154,7 +154,7 @@ sudo make install;
 # Add two aliases to ~/.bashrc
 echo "alias snort='/usr/local/snort3/bin/snort --daq-dir /usr/local/lib/daq_s3'" >> ~/.bashrc
 echo "alias sudo='sudo '" >> ~/.bashrc
-source ~/.bashrc
+source ~/.bashrc;
 
 echo "
 Installed Snort3"
