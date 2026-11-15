@@ -1,0 +1,167 @@
+#!/bin/bash
+
+# This script will install and update Snort version 3 #
+
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y \
+build-essential \
+g++ \
+cmake \
+flex \
+bison \
+git \
+make \
+autoconf \
+automake \
+libtool \
+libtool-bin\
+pkg-config \
+libpcap-dev \
+libhwloc-dev \
+libluajit-5.1-dev \
+libssl-dev \
+zlib1g-dev \
+libpcre2-dev \
+libdumbnet-dev \
+liblzma-dev \
+xz-utils \
+wget;
+
+echo -e "\e[33mBuild-Essentials\e[0m"
+build-essentials --version
+echo -e "\e[33mg++\e[0m"
+g++ --version
+echo -e "\e[33mcmake\e[0m"
+cmake --version
+echo -e "\e[33mflex\e[0m"
+flex --version
+echo -e "\e[33mbison\e[0m"
+bison --version
+echo -e "\e[33mgit\e[0m"
+git --version
+echo -e "\e[33mmake\e[0m"
+make --version
+echo -e "\e[33mautoconf\e[0m"
+autoconf --version
+echo -e "\e[33mautomake\e[0m"
+automake --version
+echo -e "\e[33mlibtool\e[0m"
+libtool --version
+echo -e "\e[33mpkg_config\e[0m"
+pkg-config --version
+echo -e "\e[33mlibcap-dev\e[0m"
+libpcap-dev --version
+echo -e "\e[33mlibhwloc-dev\e[0m"
+libhwloc-dev --version
+echo -e "\e[33mlibluajit-5.1\e[0m"
+libluajit-5.1-dev --version
+echo -e "\e[33mlibssl-dev\e[0m"
+libssl-dev --version
+echo -e "\e[33mzlib1g-dev\e[0m"
+zlib1g-dev --version
+echo -e "\e[33mlibpcre2-dev\e[0m"
+libpcre2-dev --version
+echo -e "\e[33mlibdumbnet-dev\e[0m"
+libdumbnet-dev --version
+echo -e "\e[33mliblzma-dev\e[0m"
+liblzma-dev --version
+echo -e "\e[33mxz-utils\e[0m"
+xz-utils --version
+echo -e "\e[33mwget\e[0m"
+wget --version;
+
+echo -e "\n\e[33m[g++]\e[0m"; g++ --version | head -n 1
+echo -e "\n\e[33m[cmake]\e[0m"; cmake --version | head -n 1
+echo -e "\n\e[33m[flex]\e[0m"; flex --version
+echo -e "\n\e[33m[bison]\e[0m"; bison --version | head -n 1
+echo -e "\n\e[33m[git]\e[0m"; git --version
+echo -e "\n\e[33m[make]\e[0m"; make --version | head -n 1
+echo -e "\n\e[33m[autoconf]\e[0m"; autoconf --version | head -n 1
+echo -e "\n\e[33m[automake]\e[0m"; automake --version | head -n 1
+echo -e "\n\e[33m[libtool]\e[0m"; libtool --version | head -n 1
+echo -e "\n\e[33m[pkg-config]\e[0m"; pkg-config --version
+echo -e "\n\e[33m[xz-utils]\e[0m"; xz --version | head -n 1
+echo -e "\n\e[33m[wget]\e[0m"; wget --version | head -n 1
+echo -e "\n\e[35m[Installed Development Libraries & Meta-Packages]\e[0m"
+
+dpkg -l | grep -E "build-essential|libpcap-dev|libhwloc-dev|libluajit-5.1-dev|libssl-dev|zlib1g-dev|libpcre2-dev|libdumbnet-dev|liblzma-dev" | awk '{print $2, $3}';
+echo "
+Installed libpcap"
+read -p "Continue? Press Enter"
+
+
+# Clones the git repo for libdaq #
+cd ~
+git clone https://github.com/snort3/libdaq.git
+cd libdaq
+./bootstrap
+./configure --prefix=/usr/local/lib/daq_s3;
+
+# Installs libdaq #
+make -j"$(nproc)"
+sudo make install;
+
+echo "/usr/local/lib/daq_s3/lib/" | sudo tee /etc/ld.so.conf.d/libdaq3.conf
+sudo ldconfig;
+
+ls /usr/local/lib/daq_s3/lib/daq | grep pcap; # Verifies if pcap is installed
+
+echo "
+Installed libdaq"
+read -p "Continue? Press Enter";
+
+# Clones Snort3 from github #
+cd ~
+git clone https://github.com/snort3/snort3.git
+cd snort3;
+
+# Bro installer for the bro hotfix #
+cd ~
+rm -rf brotli # Remove any old source folders
+git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
+cd brotli
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+make -j"$(nproc)"
+sudo make install
+sudo ldconfig;
+
+
+#Choose an installation path:
+cd ~/snort3
+export my_path=/usr/local/snort3
+sudo mkdir -p "$my_path";
+
+#Conﬁgure, pointing to LibDAQ:
+./configure_cmake.sh --prefix="$my_path" \
+--with-daq-includes=/usr/local/lib/daq_s3/include/ \
+--with-daq-libraries=/usr/local/lib/daq_s3/lib/;
+
+# Bro hotfix
+cmake .. \
+-DDAQ_LIBRARIES=/usr/local/lib/daq_s3/lib/libdaq.so \
+-DDAQ_INCLUDE_DIR=/usr/local/lib/daq_s3/include \
+-DCMAKE_DISABLE_FIND_PACKAGE_Brotli=ON;
+
+# If you encounter LZMA-related errors, conﬁrm liblzma-dev is installed (see Step 1), then
+# clear the build directory and re-run the conﬁguration.
+# Build and install:
+cd build
+make -j"$(nproc)"
+sudo make install;
+
+# Add convenient aliases
+# Add two aliases to ~/.bashrc
+echo "alias snort='/usr/local/snort3/bin/snort --daq-dir /usr/local/lib/daq_s3'" >> ~/.bashrc
+echo "alias sudo='sudo '" >> ~/.bashrc
+source ~/.bashrc
+
+echo "
+Installed Snort3"
+read -p "Continue? Press Enter";
+
+echo "
+This will take you to and finishes STEP 4 of the Snort3 installation guide"
+echo "Compiled by MrBlackLab"
+echo "
+Exiting"
